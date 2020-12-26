@@ -37,10 +37,10 @@ END nand1;
 
 --------------------------------------------------------------------------------
 
-ARCHITECTURE gate OF nand1 IS
+ARCHITECTURE dataflow OF nand1 IS
 BEGIN
 
   a_out <= a_in NAND b_in;
 
-END ARCHITECTURE gate;
+END ARCHITECTURE dataflow;
 

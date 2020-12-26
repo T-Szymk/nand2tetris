@@ -1,23 +1,22 @@
 --------------------------------------------------------------------------------
--- Title      : 1-bit nand gate (gate level description)
+-- Title      : 1-bit mux 
 -- Project    : NAND2TETRIS
 --------------------------------------------------------------------------------
--- File       : nand1.vhd
+-- File       : mux1.vhd
 -- Author(s)  : T. Szymkowiak
 -- Company    : TUNI
 -- Created    : 2020-12-26
--- Design     : nand1
+-- Design     : mux1
 -- Platform   : -
 -- Standard   : VHDL'93
 --------------------------------------------------------------------------------
--- Description: Implementation of a 1-bit nand gate. This is to be the primitive
---              block that is used within the remaining implementations through-
---              out the project.
+-- Description: Implementation of a 1-bit mux. 
 --              INPUTS:
---                      a_in  : 1-bit input of nand gate
---                      b_in  : 1-bit input of nand gate
+--                      a_in  : 1-bit input 0 of mux gate
+--                      b_in  : 1-bit input 1 of mux gate
+--                      s_in  : 1-bit selector signal
 --              OUTPUTS:
---                      a_out : 1-bit output of nand gate
+--                      a_out : 1-bit output of and gate
 --------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version  Author  Description
@@ -26,21 +25,32 @@
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
-ENTITY nand1 IS 
+ENTITY mux1 IS
   PORT (
-          a_in  : IN STD_LOGIC;
-          b_in  : IN STD_LOGIC;
+         a_in  : IN STD_LOGIC;
+         b_in  : IN STD_LOGIC;
+         s_in  : IN STD_LOGIC;
 
-          a_out : OUT STD_LOGIC
+         a_out : OUT STD_LOGIC
        );
-END nand1;
+END mux1;
 
 --------------------------------------------------------------------------------
 
-ARCHITECTURE dataflow OF nand1 IS
-BEGIN
+ARCHITECTURE behavioural OF mux1 IS
+BEGIN 
 
-  a_out <= a_in NAND b_in;
+  mux : PROCESS (a_in, b_in, s_in) IS 
+  BEGIN
 
-END ARCHITECTURE dataflow;
+    IF (s_in = '0') THEN
 
+      a_out <= a_in;
+
+    ELSE
+
+      a_out <= b_in;
+
+    END IF;
+  END PROCESS mux;
+END ARCHITECTURE behavioural;
