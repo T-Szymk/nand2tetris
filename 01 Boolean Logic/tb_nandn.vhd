@@ -89,13 +89,13 @@ BEGIN
 
     ELSE
 
-      FOR i IN test_case_count_g - 1 DOWNTO 0 LOOP
-        FOR j IN (2**width_vals(i)) - 2 DOWNTO 0 LOOP
+      FOR i IN test_case_count_g - 1 DOWNTO 0 LOOP -- iterate through elements of val array
+        FOR j IN (2**width_vals(i)) - 2 DOWNTO 0 LOOP -- loop for number of possible bit combos 2^n - 1
 
-          a_in_vals(i) <= a_in_vals(i) + 1;
+          a_in_vals(i) <= a_in_vals(i) + 1; -- increment element a
           WAIT FOR 1 NS;
 
-          FOR k IN width_vals(i) - 1 DOWNTO 0 LOOP
+          FOR k IN width_vals(i) - 1 DOWNTO 0 LOOP -- verify bitwise NAND
             ASSERT a_out_vals(i)(k) = (a_in_vals(i)(k) NAND b_in_vals(i)(k))
               REPORT "NAND result does not match expected value."
               SEVERITY FAILURE;
@@ -104,9 +104,10 @@ BEGIN
         END LOOP;
       END LOOP;
 
-      FOR i IN test_case_count_g - 1 DOWNTO 0 LOOP
-        FOR j IN (2**width_vals(i)) - 2 DOWNTO 0 LOOP
-          b_in_vals(i) <= b_in_vals(i) + 1;
+      FOR i IN test_case_count_g - 1 DOWNTO 0 LOOP -- iterate through elements of val array
+        FOR j IN (2**width_vals(i)) - 2 DOWNTO 0 LOOP -- loop for number of possible bit combos 2^n - 1
+          
+          b_in_vals(i) <= b_in_vals(i) + 1; -- increment element b
           WAIT FOR 1 NS;
 
           FOR k IN width_vals(i) - 1 DOWNTO 0 LOOP
