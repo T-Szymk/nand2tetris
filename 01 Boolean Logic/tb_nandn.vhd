@@ -30,7 +30,8 @@ END tb_nandn;
 --------------------------------------------------------------------------------
 
 ARCHITECTURE tb OF tb_nandn IS
-
+  
+  -- define components for use in tb
   COMPONENT nandn IS
     GENERIC (
               width_g : INTEGER
@@ -43,17 +44,21 @@ ARCHITECTURE tb OF tb_nandn IS
          );
   END COMPONENT nandn;
   
+  -- declare required custom types and signals
   TYPE WidthArray IS ARRAY(test_case_count_g - 1 DOWNTO 0) OF 
                                      INTEGER RANGE max_width_g - 1 DOWNTO 0;
   TYPE ValArray IS ARRAY(test_case_count_g - 1 DOWNTO 0) OF 
                             SIGNED(2**(test_case_count_g - 1) - 1 DOWNTO 0); 
   
+  -- array containing widths of each component instance within the tb
   SIGNAL width_vals                       : WidthArray := (OTHERS => 0);
   SIGNAL rst_n                            : STD_LOGIC := '0';
+  -- signals containing inputs and outputs for each component
   SIGNAL a_in_vals, b_in_vals, a_out_vals : ValArray;
 
 BEGIN 
-
+  -- generate instances of device under verification, number controlled by 
+  -- generic 'test_case_count_g'
   generate_duv : FOR i IN test_case_count_g - 1 DOWNTO 0 GENERATE
 
     i_nan_0 : nandn
@@ -68,7 +73,7 @@ BEGIN
 
   END GENERATE generate_duv;
 
-  test : PROCESS IS
+  test : PROCESS IS -- process to run through testing logic
   BEGIN
 
     ASSERT (width_vals(test_case_count_g - 1) <= max_width_g)
@@ -88,39 +93,44 @@ BEGIN
       WAIT FOR 1 NS;
 
     ELSE
+      -- increment input a vals and verify the output is correct
+      test_case_loop_a : FOR i IN test_case_count_g - 1 DOWNTO 0 LOOP
+       bit_loop_a : FOR j IN (2**width_vals(i)) - 2 DOWNTO 0 LOOP
 
-      FOR i IN test_case_count_g - 1 DOWNTO 0 LOOP -- iterate through elements of val array
-        FOR j IN (2**width_vals(i)) - 2 DOWNTO 0 LOOP -- loop for number of possible bit combos 2^n - 1
-
-          a_in_vals(i) <= a_in_vals(i) + 1; -- increment element a
+          a_in_vals(i) <= a_in_vals(i) + 1;
           WAIT FOR 1 NS;
 
-          FOR k IN width_vals(i) - 1 DOWNTO 0 LOOP -- verify bitwise NAND
+          check_output_a : FOR k IN width_vals(i) - 1 DOWNTO 0 LOOP
+
             ASSERT a_out_vals(i)(k) = (a_in_vals(i)(k) NAND b_in_vals(i)(k))
               REPORT "NAND result does not match expected value."
               SEVERITY FAILURE;
 
-          END LOOP;
-        END LOOP;
-      END LOOP;
+          END LOOP check_output_a;
+        END LOOP bit_loop_a;
+      END LOOP test_case_loop_a;
 
-      FOR i IN test_case_count_g - 1 DOWNTO 0 LOOP -- iterate through elements of val array
-        FOR j IN (2**width_vals(i)) - 2 DOWNTO 0 LOOP -- loop for number of possible bit combos 2^n - 1
+      -- increment input a vals and verify the output is correct
+      test_case_loop_b : FOR i IN test_case_count_g - 1 DOWNTO 0 LOOP 
+      bit_loop_b : FOR j IN (2**width_vals(i)) - 2 DOWNTO 0 LOOP
           
-          b_in_vals(i) <= b_in_vals(i) + 1; -- increment element b
+          b_in_vals(i) <= b_in_vals(i) + 1;
           WAIT FOR 1 NS;
 
-          FOR k IN width_vals(i) - 1 DOWNTO 0 LOOP
+          check_output_b : FOR k IN width_vals(i) - 1 DOWNTO 0 LOOP
+
             ASSERT a_out_vals(i)(k) = (a_in_vals(i)(k) NAND b_in_vals(i)(k))
               REPORT "NAND result does not match expected value."
               SEVERITY FAILURE;
-          END LOOP;
-        END LOOP;
-      END LOOP;
+
+          END LOOP check_output_b;
+        END LOOP bit_loop_b;
+      END LOOP test_case_loop_b;
     
-      ASSERT FALSE
+      ASSERT FALSE -- end test
         REPORT "Simulation successful!."
         SEVERITY FAILURE;
+
     END IF;
   END PROCESS test;
 END ARCHITECTURE tb;
