@@ -1,12 +1,12 @@
 --------------------------------------------------------------------------------
--- Title      : testbench for n-bit nand
+-- Title      : testbench for n-bit and
 -- Project    : NAND2TETRIS
 --------------------------------------------------------------------------------
--- File       : tb_nandn.vhd
+-- File       : tb_andn.vhd
 -- Author(s)  : T. Szymkowiak
 -- Company    : TUNI
 -- Created    : 2020-12-27
--- Design     : tb_nandn
+-- Design     : tb_andn
 -- Platform   : -
 -- Standard   : VHDL'93
 --------------------------------------------------------------------------------
@@ -20,19 +20,19 @@ LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.NUMERIC_STD.ALL;
 
-ENTITY tb_nandn IS
+ENTITY tb_andn IS
   GENERIC (
             test_case_count_g : INTEGER := 5;
             max_width_g       : INTEGER := 64
           );
-END tb_nandn;
+END tb_andn;
 
 --------------------------------------------------------------------------------
 
-ARCHITECTURE tb OF tb_nandn IS
+ARCHITECTURE tb OF tb_andn IS
   
   -- define components for use in tb
-  COMPONENT nandn IS
+  COMPONENT andn IS
     GENERIC (
               width_g : INTEGER
             );
@@ -42,7 +42,7 @@ ARCHITECTURE tb OF tb_nandn IS
   
             a_out : OUT STD_LOGIC_VECTOR (width_g - 1 DOWNTO 0)
          );
-  END COMPONENT nandn;
+  END COMPONENT andn;
   
   -- declare required custom types and signals
   TYPE WidthArray IS ARRAY(test_case_count_g - 1 DOWNTO 0) OF 
@@ -52,6 +52,7 @@ ARCHITECTURE tb OF tb_nandn IS
   
   -- array containing widths of each component instance within the tb
   SIGNAL width_vals                       : WidthArray := (OTHERS => 0);
+  -- reset used for value initialisation
   SIGNAL rst_n                            : STD_LOGIC := '0';
   -- signals containing inputs and outputs for each component
   SIGNAL a_in_vals, b_in_vals, a_out_vals : ValArray;
@@ -61,7 +62,7 @@ BEGIN -- architecture
   -- generic 'test_case_count_g'
   generate_duv : FOR i IN test_case_count_g - 1 DOWNTO 0 GENERATE
 
-    i_nan_0 : nandn
+    i_nan_0 : andn
       GENERIC MAP (
                     width_g => 2**i
                   )
@@ -102,8 +103,8 @@ BEGIN -- architecture
 
           check_output_a : FOR k IN width_vals(i) - 1 DOWNTO 0 LOOP
 
-            ASSERT a_out_vals(i)(k) = (a_in_vals(i)(k) NAND b_in_vals(i)(k))
-              REPORT "NAND result does not match expected value."
+            ASSERT a_out_vals(i)(k) = (a_in_vals(i)(k) AND b_in_vals(i)(k))
+              REPORT "AND result does not match expected value."
               SEVERITY FAILURE;
 
           END LOOP check_output_a;
@@ -119,8 +120,8 @@ BEGIN -- architecture
 
           check_output_b : FOR k IN width_vals(i) - 1 DOWNTO 0 LOOP
 
-            ASSERT a_out_vals(i)(k) = (a_in_vals(i)(k) NAND b_in_vals(i)(k))
-              REPORT "NAND result does not match expected value."
+            ASSERT a_out_vals(i)(k) = (a_in_vals(i)(k) AND b_in_vals(i)(k))
+              REPORT "AND result does not match expected value."
               SEVERITY FAILURE;
 
           END LOOP check_output_b;
