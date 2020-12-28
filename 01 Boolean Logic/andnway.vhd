@@ -11,7 +11,8 @@
 -- Standard   : VHDL'93
 --------------------------------------------------------------------------------
 -- Description: Implementation of an n-way and gate. The number of bits to be 
---              'anded' is determined using the generic width_c
+--              'anded' is determined using the constant width_c, which is
+--              calculated using 2^exponent_g.
 --              GENERICS:
 --                      exponent_g : power of 2 to set gate width to
 --              INPUTS:
