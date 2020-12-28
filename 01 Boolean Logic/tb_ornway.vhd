@@ -1,16 +1,16 @@
 --------------------------------------------------------------------------------
--- Title      : testbench for n-way and
+-- Title      : testbench for n-way or
 -- Project    : NAND2TETRIS
 --------------------------------------------------------------------------------
--- File       : tb_andnway.vhd
+-- File       : tb_ornway.vhd
 -- Author(s)  : T. Szymkowiak
 -- Company    : TUNI
 -- Created    : 2020-12-28
--- Design     : tb_andnway
+-- Design     : tb_ornway
 -- Platform   : -
 -- Standard   : VHDL'93
 --------------------------------------------------------------------------------
--- Description: testbench of a m-way and.
+-- Description: testbench of a m-way or.
 --------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version  Author  Description
@@ -20,18 +20,18 @@ LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.NUMERIC_STD.ALL;
 
-ENTITY tb_andnway IS
+ENTITY tb_ornway IS
   GENERIC (
             exponent_g : INTEGER := 4
           );
-END tb_andnway;
+END tb_ornway;
 
 --------------------------------------------------------------------------------
 
-ARCHITECTURE tb OF tb_andnway IS
+ARCHITECTURE tb OF tb_ornway IS
   
   -- define components for use in tb
-  COMPONENT andnway IS
+  COMPONENT ornway IS
     GENERIC (
               exponent_g : INTEGER
             );
@@ -40,7 +40,7 @@ ARCHITECTURE tb OF tb_andnway IS
   
             a_out : OUT STD_LOGIC
          );
-  END COMPONENT andnway; 
+  END COMPONENT ornway; 
   
   -- array containing widths of each component instance within the tb
   SIGNAL a_in  : UNSIGNED((2**exponent_g) - 1 DOWNTO 0) := (OTHERS => '0');
@@ -49,7 +49,7 @@ ARCHITECTURE tb OF tb_andnway IS
 
 BEGIN -- architecture
 
-    i_andn_0 : andnway
+    i_orn_0 : ornway
       GENERIC MAP (
                     exponent_g => exponent_g
                   )
@@ -77,13 +77,13 @@ BEGIN -- architecture
         SEVERITY FAILURE;
 
       -- for each possible combination, check the output is correct
-      -- output should only be 1 if all input bits are set
+      -- output should be 1 if any input bits are set
       FOR i IN (2**(2**exponent_g)) - 2 DOWNTO 0 LOOP
         
         a_in <= a_in + 1;
         WAIT FOR 1 NS; -- wait to allow signal update
 
-        IF a_in = (2**((2**exponent_g)) - 1) THEN -- assert correct values
+        IF a_in /= 0 THEN -- assert correct values
           ASSERT a_out = '1'
             REPORT "a_out does not equal 1 when expected!"
             SEVERITY FAILURE;
