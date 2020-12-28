@@ -22,7 +22,7 @@ USE IEEE.NUMERIC_STD.ALL;
 
 ENTITY tb_andnway IS
   GENERIC (
-            exponent_g : INTEGER := 5
+            exponent_g : INTEGER := 4
           );
 END tb_andnway;
 
@@ -44,12 +44,12 @@ ARCHITECTURE tb OF tb_andnway IS
   
   -- array containing widths of each component instance within the tb
   SIGNAL a_in  : UNSIGNED((2**exponent_g) - 1 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL a_out : STD_LOGIC := 0;
+  SIGNAL a_out : STD_LOGIC;
   SIGNAL rst_n : STD_LOGIC := '0';  
 
 BEGIN -- architecture
 
-    i_nan_0 : nandn
+    i_andn_0 : andnway
       GENERIC MAP (
                     exponent_g => exponent_g
                   )
@@ -65,7 +65,6 @@ BEGIN -- architecture
     IF (rst_n = '0') THEN -- initialise test vectors
 
         a_in   <= (OTHERS => '0');
-        a_out  <= '0';
 
       WAIT FOR 1 NS;
       rst_n <= '1';
@@ -77,8 +76,23 @@ BEGIN -- architecture
         REPORT "Initial value of 0 is not 0!"
         SEVERITY FAILURE;
 
-      FOR i IN (2**exponent_g) - 2 DOWNTO 0 LOOP
-       --increment value of a_in until == (2**exponent) - 1
+      -- for each possible combination, check the output is correct
+      -- output should only be 1 if all input bits are set
+      FOR i IN (2**(2**exponent_g)) - 2 DOWNTO 0 LOOP
+        
+        a_in <= a_in + 1;
+        WAIT FOR 1 NS; -- wait to allow signal update
+
+        IF a_in = (2**((2**exponent_g)) - 1) THEN -- assert correct values
+          ASSERT a_out = '1'
+            REPORT "a_out does not equal 1 when expected!"
+            SEVERITY FAILURE;
+
+        ELSE
+          ASSERT a_out = '0'
+            REPORT "a_out does not equal 0 when expected!"
+            SEVERITY FAILURE;
+        END IF;
       END LOOP;
 
     

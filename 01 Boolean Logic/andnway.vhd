@@ -31,7 +31,7 @@ ENTITY andnway IS
             exponent_g : INTEGER := 1 -- default 8-bit
           );
   PORT (
-          a_in  : IN STD_LOGIC_VECTOR (2**exponent_g - 1 DOWNTO 0);
+          a_in  : IN STD_LOGIC_VECTOR ((2**exponent_g) - 1 DOWNTO 0);
 
           a_out : OUT STD_LOGIC
        );
