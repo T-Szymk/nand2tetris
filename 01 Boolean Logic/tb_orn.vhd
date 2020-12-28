@@ -1,16 +1,16 @@
 --------------------------------------------------------------------------------
--- Title      : testbench for n-bit and
+-- Title      : testbench for n-bit or
 -- Project    : NAND2TETRIS
 --------------------------------------------------------------------------------
--- File       : tb_andn.vhd
+-- File       : tb_orn.vhd
 -- Author(s)  : T. Szymkowiak
 -- Company    : TUNI
 -- Created    : 2020-12-28
--- Design     : tb_andn
+-- Design     : tb_orn
 -- Platform   : -
 -- Standard   : VHDL'93
 --------------------------------------------------------------------------------
--- Description: testbench of a n-bit and.
+-- Description: testbench of a n-bit or.
 --------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version  Author  Description
@@ -20,19 +20,19 @@ LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.NUMERIC_STD.ALL;
 
-ENTITY tb_andn IS
+ENTITY tb_orn IS
   GENERIC (
             test_case_count_g : INTEGER := 5;
             max_width_g       : INTEGER := 64
           );
-END tb_andn;
+END tb_orn;
 
 --------------------------------------------------------------------------------
 
-ARCHITECTURE tb OF tb_andn IS
+ARCHITECTURE tb OF tb_orn IS
   
   -- define components for use in tb
-  COMPONENT andn IS
+  COMPONENT orn IS
     GENERIC (
               width_g : INTEGER
             );
@@ -42,7 +42,7 @@ ARCHITECTURE tb OF tb_andn IS
   
             a_out : OUT STD_LOGIC_VECTOR (width_g - 1 DOWNTO 0)
          );
-  END COMPONENT andn;
+  END COMPONENT orn;
   
   -- declare required custom types and signals
   TYPE WidthArray IS ARRAY(test_case_count_g - 1 DOWNTO 0) OF 
@@ -62,7 +62,7 @@ BEGIN -- architecture
   -- generic 'test_case_count_g'
   generate_duv : FOR i IN test_case_count_g - 1 DOWNTO 0 GENERATE
 
-    i_and_0 : andn
+    i_orn_0 : orn
       GENERIC MAP (
                     width_g => 2**i
                   )
@@ -79,12 +79,12 @@ BEGIN -- architecture
   -- procedure for asserting outputs are correct
     PROCEDURE checkVals IS 
     BEGIN
-      -- Assert AND of inputs and outputs is correct
+      -- Assert OR of inputs and outputs is correct
       FOR tc IN test_case_count_g - 1 DOWNTO 0 LOOP
         FOR k IN width_vals(tc) - 1 DOWNTO 0 LOOP
 
-          ASSERT a_out_vals(tc)(k) = (a_in_vals(tc)(k) AND b_in_vals(tc)(k))
-            REPORT "AND result does not match expected value."
+          ASSERT a_out_vals(tc)(k) = (a_in_vals(tc)(k) OR b_in_vals(tc)(k))
+            REPORT "OR result does not match expected value."
             SEVERITY FAILURE;
 
         END LOOP;
