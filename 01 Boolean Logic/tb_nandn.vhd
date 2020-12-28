@@ -10,7 +10,7 @@
 -- Platform   : -
 -- Standard   : VHDL'93
 --------------------------------------------------------------------------------
--- Description: testbench of a 1-bit mux.
+-- Description: testbench of a n-bit nand.
 --------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version  Author  Description
