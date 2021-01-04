@@ -16,7 +16,7 @@
 --                      b_in  : 1-bit input 1 of mux gate
 --                      s_in  : 1-bit selector signal
 --              OUTPUTS:
---                      a_out : 1-bit output of and gate
+--                      a_out : 1-bit output of mux
 --------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version  Author  Description

@@ -5,7 +5,7 @@
 -- File       : muxn4way.vhd
 -- Author(s)  : T. Szymkowiak
 -- Company    : TUNI
--- Created    : 2021-01-03
+-- Created    : 2021-01-04
 -- Design     : muxn4way
 -- Platform   : -
 -- Standard   : VHDL'93
@@ -15,48 +15,53 @@
 --              GENERIC:
 --                      width_g : bit width of mux inputs/outputs
 --              INPUTS:
---                      a_in  : n-bit input 0 of mux gate
---                      b_in  : n-bit input 1 of mux gate
+--                      a_in  : n-bit input 0 of 4-way mux gate
+--                      b_in  : n-bit input 1 of 4-way mux gate
+--                      c_in  : n-bit input 2 of 4-way mux gate
+--                      d_in  : n-bit input 3 of 4-way mux gate
 --                      s_in  : 2-bit selector signal
 --              OUTPUTS:
---                      a_out : n-bit output of and gate
+--                      a_out : n-bit output of mux
 --------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version  Author  Description
--- 2021-01-03  1.0      TZS     Created
+-- 2021-01-04  1.0      TZS     Created
 --------------------------------------------------------------------------------
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
-ENTITY mux4way IS
+ENTITY muxn4way IS
   GENERIC (
             width_g : INTEGER RANGE 64 DOWNTO 0 := 8
           );
   PORT (
          a_in  : IN STD_LOGIC_VECTOR (width_g - 1 DOWNTO 0);
          b_in  : IN STD_LOGIC_VECTOR (width_g - 1 DOWNTO 0);
-         s_in  : IN STD_LOGIC;
+         c_in  : IN STD_LOGIC_VECTOR (width_g - 1 DOWNTO 0);
+         d_in  : IN STD_LOGIC_VECTOR (width_g - 1 DOWNTO 0);
+         s_in  : IN STD_LOGIC_VECTOR (2 - 1 DOWNTO 0);
 
          a_out : OUT STD_LOGIC_VECTOR (width_g - 1 DOWNTO 0)
        );
-END mux4way;
+END muxn4way;
 
 --------------------------------------------------------------------------------
 
-ARCHITECTURE behavioural OF mux4way IS
+ARCHITECTURE behavioural OF muxn4way IS
 BEGIN 
 
-  mux : PROCESS (a_in, b_in, s_in) IS 
+  mux : PROCESS (a_in, b_in, c_in, d_in, s_in) IS 
   BEGIN
 
-    IF (s_in = '0') THEN
+    mux_select : CASE (s_in) IS
 
-      a_out <= a_in;
+      WHEN "00"   => a_out <= a_in;
+      WHEN "01"   => a_out <= b_in;
+      WHEN "10"   => a_out <= c_in;
+      WHEN "11"   => a_out <= d_in;
+      WHEN OTHERS => a_out <= a_in; -- default to setting switch to "00"
 
-    ELSE
+    END CASE mux_select;
 
-      a_out <= b_in;
-
-    END IF;
   END PROCESS mux;
 END ARCHITECTURE behavioural;
