@@ -52,7 +52,7 @@ ARCHITECTURE tb OF tb_muxn IS
 
 BEGIN
 
-  i_mux1_0 : muxn -- instantiate nand gate
+  i_mux1_0 : muxn -- instantiate n-bit mux
     GENERIC MAP (
                   width_g => width_g_tb
                 )

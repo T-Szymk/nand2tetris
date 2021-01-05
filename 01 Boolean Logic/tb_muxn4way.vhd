@@ -27,55 +27,44 @@ END tb_muxn4way;
 
 ARCHITECTURE tb OF tb_muxn4way IS
 
-  CONSTANT width_1 : INTEGER := 1;
-  CONSTANT width_4 : INTEGER := 4;
-  CONSTANT width_8 : INTEGER := 8;
-  CONSTANT width_s : INTEGER := 2;
+  CONSTANT width_c : INTEGER := 4;
 
-  SIGNAL a1_in  : STD_LOGIC_VECTOR (width_1 - 1 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL b1_in  : STD_LOGIC_VECTOR (width_1 - 1 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL c1_in  : STD_LOGIC_VECTOR (width_1 - 1 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL d1_in  : STD_LOGIC_VECTOR (width_1 - 1 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL a1_out : STD_LOGIC_VECTOR (width_1 - 1 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL a4_in  : STD_LOGIC_VECTOR (width_4 - 1 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL b4_in  : STD_LOGIC_VECTOR (width_4 - 1 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL c4_in  : STD_LOGIC_VECTOR (width_4 - 1 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL d4_in  : STD_LOGIC_VECTOR (width_4 - 1 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL a4_out : STD_LOGIC_VECTOR (width_4 - 1 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL a8_in  : STD_LOGIC_VECTOR (width_8 - 1 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL b8_in  : STD_LOGIC_VECTOR (width_8 - 1 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL c8_in  : STD_LOGIC_VECTOR (width_8 - 1 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL d8_in  : STD_LOGIC_VECTOR (width_8 - 1 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL a8_out : STD_LOGIC_VECTOR (width_8 - 1 DOWNTO 0) := (OTHERS => '0');
+  SIGNAL a_in  : STD_LOGIC_VECTOR (width_c - 1 DOWNTO 0) := (OTHERS => '0');
+  SIGNAL b_in  : STD_LOGIC_VECTOR (width_c - 1 DOWNTO 0) := (OTHERS => '0');
+  SIGNAL c_in  : STD_LOGIC_VECTOR (width_c - 1 DOWNTO 0) := (OTHERS => '0');
+  SIGNAL d_in  : STD_LOGIC_VECTOR (width_c - 1 DOWNTO 0) := (OTHERS => '0');
+  SIGNAL a_out : STD_LOGIC_VECTOR (width_c - 1 DOWNTO 0) := (OTHERS => '0');
 
-  SIGNAL s_in    : STD_LOGIC_VECTOR (width_s - 1 DOWNTO 0) := '0'; 
+  SIGNAL s_in  : STD_LOGIC_VECTOR (2 - 1 DOWNTO 0) := (OTHERS => '0'); 
 
-  SIGNAL zeros_n : STD_LOGIC_VECTOR (width_g_tb - 1 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL ones_n  : STD_LOGIC_VECTOR (width_g_tb - 1 DOWNTO 0) := (OTHERS => '1');
-
-  COMPONENT muxn
+  COMPONENT muxn4way
     GENERIC (
               width_g : INTEGER RANGE 64 DOWNTO 0
             );
     PORT (
            a_in  : IN STD_LOGIC_VECTOR (width_g - 1 DOWNTO 0);
            b_in  : IN STD_LOGIC_VECTOR (width_g - 1 DOWNTO 0);
-           s_in  : IN STD_LOGIC;
+           c_in  : IN STD_LOGIC_VECTOR (width_g - 1 DOWNTO 0);
+           d_in  : IN STD_LOGIC_VECTOR (width_g - 1 DOWNTO 0);
+           s_in  : IN STD_LOGIC_VECTOR (2 - 1 DOWNTO 0);
  
            a_out : OUT STD_LOGIC_VECTOR (width_g - 1 DOWNTO 0)
          );
-  END COMPONENT muxn;
+  END COMPONENT muxn4way;
 
-BEGIN
+  BEGIN -- tb
 
-  i_mux1_0 : muxn -- instantiate nand gate
+  i_mux_0 : muxn4way -- instantiate 4-way n-bit mux
     GENERIC MAP (
-                  width_g => width_g_tb
+                  width_g => width_c
                 )
     PORT MAP (
                a_in  => a_in,
                b_in  => b_in,
+               c_in  => c_in,
+               d_in  => d_in,
                s_in  => s_in,
+
                a_out => a_out
              ); 
 
@@ -84,27 +73,40 @@ BEGIN
   BEGIN 
     
     WAIT FOR 10 NS;
-    ASSERT a_out = zeros_n
-      REPORT "expected out = zeros when, s = 0, a = zeros, b = zeros"
-      SEVERITY FAILURE;
-  
-    a_in <= (OTHERS => '1');
-    WAIT FOR 10 NS;
-    ASSERT a_out = ones_n
-      REPORT "expected out = ones when, s = 0, a = ones, b = zeros"
-      SEVERITY FAILURE;
     
-    a_in <= (OTHERS => '0');
-    s_in <= '1';
+    a_in <= X"1";
+    b_in <= X"2";
+    c_in <= X"3";
+    d_in <= X"4";
+
     WAIT FOR 10 NS;
-    ASSERT a_out = zeros_n
-      REPORT "expected out = zeros when, s = 1, a = zeros, b = zeros"
+
+    ASSERT a_out = X"1"
+      REPORT "a_out not equal to 1 when s = 0!"
       SEVERITY FAILURE;
-    
-    b_in <= (OTHERS => '1');
+
+    s_in <= "01";
+
     WAIT FOR 10 NS;
-    ASSERT a_out = ones_n
-      REPORT "expected out = ones when, s = 1, a = zeros, b = ones"
+
+    ASSERT a_out = X"2"
+      REPORT "a_out not equal to 2 when s = 1!"
+      SEVERITY FAILURE;
+
+    s_in <= "10";
+
+    WAIT FOR 10 NS;
+
+    ASSERT a_out = X"3"
+      REPORT "a_out not equal to 3 when s = 2!"
+      SEVERITY FAILURE;
+
+    s_in <= "11";
+
+    WAIT FOR 10 NS;
+
+    ASSERT a_out = X"4"
+      REPORT "a_out not equal to 4 when s = 3!"
       SEVERITY FAILURE;
 
     ASSERT FALSE

@@ -29,6 +29,7 @@
 --------------------------------------------------------------------------------
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.NUMERIC_STD.ALL;
 
 ENTITY muxn4way IS
   GENERIC (
@@ -53,12 +54,12 @@ BEGIN
   mux : PROCESS (a_in, b_in, c_in, d_in, s_in) IS 
   BEGIN
 
-    mux_select : CASE (s_in) IS
+    mux_select : CASE (to_integer(unsigned(s_in))) IS
 
-      WHEN "00"   => a_out <= a_in;
-      WHEN "01"   => a_out <= b_in;
-      WHEN "10"   => a_out <= c_in;
-      WHEN "11"   => a_out <= d_in;
+      WHEN 0      => a_out <= a_in;
+      WHEN 1      => a_out <= b_in;
+      WHEN 2      => a_out <= c_in;
+      WHEN 3      => a_out <= d_in;
       WHEN OTHERS => a_out <= a_in; -- default to setting switch to "00"
 
     END CASE mux_select;
