@@ -19,8 +19,12 @@
 
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.NUMERIC_STD.ALL;
 
 ENTITY tb_muxn4way IS
+  GENERIC (
+           tc_count : INTEGER := 4
+          );
 END tb_muxn4way;
 
 --------------------------------------------------------------------------------
@@ -29,44 +33,58 @@ ARCHITECTURE tb OF tb_muxn4way IS
 
   CONSTANT width_c : INTEGER := 4;
 
-  SIGNAL a_in  : STD_LOGIC_VECTOR (width_c - 1 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL b_in  : STD_LOGIC_VECTOR (width_c - 1 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL c_in  : STD_LOGIC_VECTOR (width_c - 1 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL d_in  : STD_LOGIC_VECTOR (width_c - 1 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL a_out : STD_LOGIC_VECTOR (width_c - 1 DOWNTO 0) := (OTHERS => '0');
+  TYPE InputArray IS ARRAY ((tc_count * 4) - 1 DOWNTO 0) OF INTEGER;
+  TYPE OutputArray IS ARRAY (tc_count - 1 DOWNTO 0) OF INTEGER;
 
-  SIGNAL s_in  : STD_LOGIC_VECTOR (2 - 1 DOWNTO 0) := (OTHERS => '0'); 
+  SIGNAL input_vals  : InputArray  := (OTHERS => 0);
+  SIGNAL output_vals : OutputArray := (OTHERS => 0);
+  SIGNAL s_in        : STD_LOGIC_VECTOR (2 - 1 DOWNTO 0) := (OTHERS => '0'); 
 
   COMPONENT muxn4way
     GENERIC (
               width_g : INTEGER RANGE 64 DOWNTO 0
             );
     PORT (
-           a_in  : IN STD_LOGIC_VECTOR (width_g - 1 DOWNTO 0);
-           b_in  : IN STD_LOGIC_VECTOR (width_g - 1 DOWNTO 0);
-           c_in  : IN STD_LOGIC_VECTOR (width_g - 1 DOWNTO 0);
-           d_in  : IN STD_LOGIC_VECTOR (width_g - 1 DOWNTO 0);
-           s_in  : IN STD_LOGIC_VECTOR (2 - 1 DOWNTO 0);
+           a_in  : IN STD_LOGIC_VECTOR(width_g - 1 DOWNTO 0);
+           b_in  : IN STD_LOGIC_VECTOR(width_g - 1 DOWNTO 0);
+           c_in  : IN STD_LOGIC_VECTOR(width_g - 1 DOWNTO 0);
+           d_in  : IN STD_LOGIC_VECTOR(width_g - 1 DOWNTO 0);
+           s_in  : IN STD_LOGIC_VECTOR(2 - 1 DOWNTO 0);
  
-           a_out : OUT STD_LOGIC_VECTOR (width_g - 1 DOWNTO 0)
+           a_out : OUT STD_LOGIC_VECTOR(width_g - 1 DOWNTO 0)
          );
   END COMPONENT muxn4way;
 
+  PROCEDURE check_result (VARIABLE tc : IN INTEGER) IS
+  BEGIN
+    
+    FOR element IN tc_count - 1 DOWNTO 0 LOOP
+
+      ASSERT input_vals((element * 4) + tc) = output_vals(element)
+        REPORT "Output value does not match the expected input value"
+        SEVERITY FAILURE;
+
+    END LOOP;
+
+  END PROCEDURE check_result;
+
   BEGIN -- tb
 
-  i_mux_0 : muxn4way -- instantiate 4-way n-bit mux
-    GENERIC MAP (
-                  width_g => width_c
-                )
-    PORT MAP (
-               a_in  => a_in,
-               b_in  => b_in,
-               c_in  => c_in,
-               d_in  => d_in,
-               s_in  => s_in,
+  generate_muxs : FOR id IN tc_count - 1 DOWNTO 0 GENERATE
+    i_mux_0 : muxn4way -- instantiate 4-way n-bit mux
+      GENERIC MAP (
+                    width_g => 2**id
+                  )
+      PORT MAP (
+                 a_in  => STD_LOGIC_VECTOR(TO_UNSIGNED(input_vals(id + 0), 2**id)),
+                 b_in  => STD_LOGIC_VECTOR(TO_UNSIGNED(input_vals(id + 1), 2**id)),
+                 c_in  => STD_LOGIC_VECTOR(TO_UNSIGNED(input_vals(id + 2), 2**id)),
+                 d_in  => STD_LOGIC_VECTOR(TO_UNSIGNED(input_vals(id + 3), 2**id)),
+                 s_in  => s_in,
 
-               a_out => a_out
-             ); 
+                 UNSIGNED(a_out) => TO_UNSIGNED(output_vals(id), 2**id)
+               ); 
+  END GENERATE generate_muxs;
 
   -- start test
   test : PROCESS IS 
@@ -74,41 +92,26 @@ ARCHITECTURE tb OF tb_muxn4way IS
     
     WAIT FOR 10 NS;
     
-    a_in <= X"1";
-    b_in <= X"2";
-    c_in <= X"3";
-    d_in <= X"4";
+    init_loop : FOR element IN (tc_count * 4) - 1 DOWNTO 0 LOOP -- loop to initialise inputs
+
+      input_vals(element) <= element + 1;
+
+    END LOOP init_loop;
 
     WAIT FOR 10 NS;
 
-    ASSERT a_out = X"1"
-      REPORT "a_out not equal to 1 when s = 0!"
-      SEVERITY FAILURE;
+    check_result(0);
 
-    s_in <= "01";
+    count_loop : FOR element IN 1 TO 4 LOOP -- loop to increment switch
+      
+      s_in <= std_logic_vector(unsigned(element, 2));
+      
+      WAIT FOR 10 NS;
 
-    WAIT FOR 10 NS;
+      check_result(element);
 
-    ASSERT a_out = X"2"
-      REPORT "a_out not equal to 2 when s = 1!"
-      SEVERITY FAILURE;
-
-    s_in <= "10";
-
-    WAIT FOR 10 NS;
-
-    ASSERT a_out = X"3"
-      REPORT "a_out not equal to 3 when s = 2!"
-      SEVERITY FAILURE;
-
-    s_in <= "11";
-
-    WAIT FOR 10 NS;
-
-    ASSERT a_out = X"4"
-      REPORT "a_out not equal to 4 when s = 3!"
-      SEVERITY FAILURE;
-
+    END LOOP count_loop;
+    
     ASSERT FALSE
       REPORT "Simulation successful!"
       SEVERITY FAILURE;
